@@ -1,6 +1,7 @@
 import express from 'express';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { createHash } from 'crypto';
 import { db } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 
@@ -74,8 +75,16 @@ router.post('/login', async (req, res) => {
 
     const user = db.prepare(`SELECT id, email, name, password_hash FROM users WHERE email = ?`).get(email);
 
-    // Use async compare to avoid blocking the event loop
-    const passwordMatch = user ? await bcryptjs.compare(password, user.password_hash) : false;
+    // Verify password — support both bcrypt and fast SHA-256 (used for demo accounts on low-CPU hosts)
+    let passwordMatch = false;
+    if (user) {
+      if (user.password_hash.startsWith('SHA256:')) {
+        const sha256 = createHash('sha256').update(password).digest('hex');
+        passwordMatch = user.password_hash === `SHA256:${sha256}`;
+      } else {
+        passwordMatch = await bcryptjs.compare(password, user.password_hash);
+      }
+    }
 
     if (!user || !passwordMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });

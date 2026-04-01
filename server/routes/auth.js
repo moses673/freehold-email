@@ -7,9 +7,9 @@ import { requireAuth } from '../middleware/auth.js';
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'freehold-dev-secret-change-in-production';
 const JWT_EXPIRY = '7d';
-// Cost factor 6 — fast enough for free-tier 0.1 CPU Render instances.
-// Cost 10 causes 30-60s blocking on throttled containers.
-const BCRYPT_ROUNDS = 6;
+// Cost factor 4 — the free Render tier (0.1 CPU) makes cost 6 take 20+ seconds.
+// Upgrade to cost 10 when on a paid instance.
+const BCRYPT_ROUNDS = 4;
 
 /**
  * POST /api/auth/register

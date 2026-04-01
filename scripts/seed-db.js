@@ -83,9 +83,10 @@ for (const [name, category, subject, html] of templates) {
 db.run(`UPDATE lists SET contact_count = (SELECT COUNT(*) FROM contacts WHERE list_id = lists.id)`);
 
 // Seed default admin user
-// Hash is bcryptjs cost-6 of 'freehold2026' — pre-computed to avoid blocking build on slow CPU
-// To regenerate: node -e "import('bcryptjs').then(({default:b}) => console.log(b.hashSync('freehold2026', 6)))"
-const adminHash = '$2a$06$wuyk28uL8Xldu2BB3i4SdO5.VPwe8NTVo00goO7CV7iqNPcpnhkRa';
+// Hash is bcryptjs cost-4 of 'freehold2026' — pre-computed to avoid blocking build on slow CPU.
+// Cost 4 is used because the free Render tier (0.1 CPU) makes cost 6+ take 20+ seconds.
+// To regenerate: node -e "import('bcryptjs').then(({default:b}) => console.log(b.hashSync('freehold2026', 4)))"
+const adminHash = '$2a$04$yexHUh55JekXmYtXzDeWmuQiPRvu3nNgAgKxmDTy3Nw6MAenTXDta';
 db.run(
   `INSERT OR IGNORE INTO users (email, password_hash, name) VALUES (?, ?, ?)`,
   ['admin@freehold.local', adminHash, 'Admin']

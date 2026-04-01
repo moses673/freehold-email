@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Empty string = relative URLs, so API calls go to the same origin.
+// Set VITE_API_URL at build time only if API lives on a different host.
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 /**
  * Hook for making API calls with loading/error states

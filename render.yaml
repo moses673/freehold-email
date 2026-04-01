@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: freehold-email
+    env: node
+    buildCommand: npm install && npm run build && node scripts/init-db.js && node scripts/seed-db.js
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: POSTMARK_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: UNSUBSCRIBE_SECRET
+        generateValue: true
+      - key: APP_URL
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: PORT
+        value: 3001
+      - key: DB_PATH
+        value: /app/data/freehold.db
+      - key: POSTMARK_FROM_EMAIL
+        sync: false
+    disk:
+      name: freehold-data
+      mountPath: /app/data
+      sizeGB: 1

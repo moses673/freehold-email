@@ -1,0 +1,44 @@
+{
+  "name": "freehold-email",
+  "version": "0.1.0",
+  "description": "Freehold Email - One-time-purchase email marketing for small businesses",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "build": "cd client && npm install && npm run build",
+    "start": "NODE_ENV=production node server/index.js",
+    "dev": "concurrently \"node --watch server/index.js\" \"cd client && npm run dev\"",
+    "setup": "node scripts/init-db.js && node scripts/seed-db.js",
+    "migrate": "node scripts/migrate-add-unsubscribe.js && node scripts/migrate-add-users.js",
+    "server:dev": "node --watch server/index.js",
+    "server:start": "node server/index.js",
+    "client:dev": "vite client --host",
+    "client:build": "vite build client",
+    "db:init": "node scripts/init-db.js",
+    "db:seed": "node scripts/seed-db.js",
+    "lint": "eslint . --ext .js,.jsx",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "better-sqlite3": "^9.2.2",
+    "axios": "^1.6.5",
+    "papaparse": "^5.4.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.1.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.0.8",
+    "tailwindcss": "^3.3.6",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "eslint": "^8.54.0",
+    "eslint-config-react-app": "^7.0.1",
+    "concurrently": "^8.2.1"
+  }
+}

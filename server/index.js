@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
-import { db } from './db.js';
+import { db, ensureDbInitialized } from './db.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { requireAuth } from './middleware/auth.js';
 import authRouter from './routes/auth.js';
@@ -88,24 +88,21 @@ app.use(notFoundHandler);
 // Error handler (must be last)
 app.use(errorHandler);
 
-// Database checks
-const checkDatabase = () => {
+// Start server
+const start = async () => {
+  // Wait for database initialization
+  console.log('[server] Waiting for database initialization...');
+  await ensureDbInitialized();
+  console.log('[server] Database ready');
+
+  // Quick sanity check
   try {
     const result = db.prepare('SELECT COUNT(*) as count FROM contacts').get();
-    console.log(`✓ Database connected (${result.count} contacts)`);
-    return true;
+    console.log(`[server] ✓ Database connected (${result.count} contacts)`);
   } catch (error) {
-    console.error('✗ Database error:', error.message);
-    console.log('Run: npm run db:init && npm run db:seed');
-    return false;
-  }
-};
-
-// Start server
-const start = () => {
-  if (!checkDatabase()) {
-    console.error('Cannot start server without database. Exiting.');
-    process.exit(1);
+    console.warn('[server] Database check warning:', error.message);
+    // Don't exit — db.js auto-creates tables, so this shouldn't happen
+    // but if it does, let the server start anyway and fail on actual requests
   }
 
   app.listen(PORT, () => {
@@ -120,6 +117,9 @@ const start = () => {
   });
 };
 
-start();
+start().catch(err => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
+});
 
 export default app;

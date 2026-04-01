@@ -123,7 +123,7 @@ router.post('/', (req, res, next) => {
 
       res.status(201).json(contact);
     } catch (error) {
-      if (error.message.includes('UNIQUE')) {
+      if (error && error.message && error.message.includes('UNIQUE')) {
         return res.status(409).json({ error: 'Email already exists' });
       }
       throw error;
@@ -167,7 +167,7 @@ router.put('/:id', (req, res, next) => {
       contact.tags = contact.tags ? JSON.parse(contact.tags) : [];
       res.json(contact);
     } catch (error) {
-      if (error.message.includes('UNIQUE')) {
+      if (error && error.message && error.message.includes('UNIQUE')) {
         return res.status(409).json({ error: 'Email already exists' });
       }
       throw error;

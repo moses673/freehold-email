@@ -1,7 +1,10 @@
-import Database from 'better-sqlite3';
+import { createRequire } from 'module';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+
+const require = createRequire(import.meta.url);
+const initSqlJs = require('sql.js');
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = path.join(__dirname, '../data/freehold.db');
@@ -12,11 +15,12 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
-// Initialize database
-const db = new Database(dbPath);
+// Initialize sql.js and create database
+const SQL = await initSqlJs();
+const db = new SQL.Database();
 
 // Enable foreign keys
-db.pragma('foreign_keys = ON');
+db.run('PRAGMA foreign_keys = ON');
 
 // Create tables
 db.exec(`
@@ -130,7 +134,10 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_events_created_at ON events(created_at);
 `);
 
+// Save database to disk
+const data = db.export();
+fs.writeFileSync(dbPath, Buffer.from(data));
+db.close();
+
 console.log('✓ Database initialized at', dbPath);
 console.log('✓ Tables created: users, lists, contacts, templates, campaigns, campaign_sends, events');
-
-db.close();

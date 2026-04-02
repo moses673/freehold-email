@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import useAuth from './hooks/useAuth';
 import Navbar from './components/Navbar';
+import FeedbackWidget from './components/FeedbackWidget';
 import LoginPage from './pages/LoginPage';
 import ContactsPage from './pages/ContactsPage';
 import TemplatesPage from './pages/TemplatesPage';
@@ -45,6 +46,7 @@ export default function App() {
         {currentPage === 'analytics' && <AnalyticsPage />}
         {currentPage === 'domains' && <DomainVerificationPage />}
       </main>
+      <FeedbackWidget />
     </div>
   );
 }

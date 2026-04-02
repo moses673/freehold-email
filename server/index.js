@@ -15,6 +15,7 @@ import campaignsRouter from './routes/campaigns.js';
 import webhooksRouter from './routes/webhooks.js';
 import analyticsRouter from './routes/analytics.js';
 import unsubscribeRouter from './routes/unsubscribe.js';
+import feedbackRouter from './routes/feedback.js';
 
 // Load environment variables
 dotenv.config();
@@ -67,6 +68,9 @@ app.use('/api/webhooks', webhooksRouter);
 
 // Analytics routes (protected)
 app.use('/api/analytics', requireAuth, analyticsRouter);
+
+// Feedback routes (POST is public, GET is protected)
+app.use('/api/feedback', feedbackRouter);
 
 // Unsubscribe handler (public route, not under /api)
 app.use('/', unsubscribeRouter);

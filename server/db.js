@@ -123,6 +123,19 @@ const CREATE_TABLES_SQL = `
   CREATE INDEX IF NOT EXISTS idx_events_campaign_id ON events(campaign_id);
   CREATE INDEX IF NOT EXISTS idx_events_contact_id ON events(contact_id);
   CREATE INDEX IF NOT EXISTS idx_events_created_at ON events(created_at);
+
+  CREATE TABLE IF NOT EXISTS feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    category TEXT NOT NULL CHECK(category IN ('bug', 'feature', 'general')),
+    message TEXT NOT NULL,
+    email TEXT,
+    page TEXT,
+    user_agent TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_feedback_category ON feedback(category);
+  CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback(created_at);
 `;
 
 // Prepared statement wrapper

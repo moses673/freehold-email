@@ -1,22 +1,30 @@
-version: '3.8'
+# ─────────────────────────────────────────────
+# Freehold Email — Docker Compose
+# Run: docker compose up -d
+# ─────────────────────────────────────────────
+
 services:
-  app:
+  freehold-email:
     build: .
+    container_name: freehold-email
     ports:
-      - "3001:3001"
+      - "${PORT:-3001}:3001"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - POSTMARK_API_KEY=${POSTMARK_API_KEY}
-      - JWT_SECRET=${JWT_SECRET}
-      - UNSUBSCRIBE_SECRET=${UNSUBSCRIBE_SECRET}
-      - APP_URL=${APP_URL}
-      - CLIENT_URL=${CLIENT_URL}
       - DB_PATH=/app/data/freehold.db
-      - POSTMARK_FROM_EMAIL=${POSTMARK_FROM_EMAIL}
     volumes:
       - freehold_data:/app/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
 
 volumes:
   freehold_data:
+    name: freehold-email-data

@@ -1,7 +1,12 @@
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{js,jsx}",
+    path.resolve(__dirname, "index.html"),
+    path.resolve(__dirname, "src/**/*.{js,jsx}"),
   ],
   theme: {
     extend: {

@@ -1,0 +1,10 @@
+node_modules/
+.git/
+.env
+.env.local
+.DS_Store
+*.log
+data/
+client/dist/
+client/node_modules/
+.vite/

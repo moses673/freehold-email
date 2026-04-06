@@ -50,6 +50,20 @@ if (NODE_ENV === 'development') {
   });
 }
 
+// Keep-alive: self-ping every 14 minutes to prevent Render free tier sleep
+// Only runs in production so it doesn't interfere with local dev
+if (process.env.NODE_ENV === 'production') {
+  const SELF_URL = process.env.APP_URL || 'https://freehold-email.onrender.com';
+  setInterval(async () => {
+    try {
+      const response = await fetch(`${SELF_URL}/health`);
+      console.log(`[keepalive] ping ${response.status}`);
+    } catch (err) {
+      console.warn('[keepalive] ping failed:', err.message);
+    }
+  }, 14 * 60 * 1000); // 14 minutes
+}
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

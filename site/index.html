@@ -530,6 +530,29 @@
 
           // Handle form submission — POST to Freehold backend
           const SIGNUP_API = 'https://freehold-email.onrender.com/api/signups';
+          const SIGNUP_TIMEOUT_MS = 45000; // Render free tier can take ~30s cold start
+
+          function fetchWithTimeout(url, opts, ms) {
+            return new Promise(function(resolve, reject) {
+              var timer = setTimeout(function() {
+                reject(new Error('timeout'));
+              }, ms);
+              fetch(url, opts).then(function(res) {
+                clearTimeout(timer);
+                resolve(res);
+              }).catch(function(err) {
+                clearTimeout(timer);
+                reject(err);
+              });
+            });
+          }
+
+          var coldStartMessages = [
+            'Submitting…',
+            'Waking the server…',
+            'Almost there…',
+          ];
+
           const form = document.getElementById('signup-form');
           if (form) {
             form.addEventListener('submit', function(e) {
@@ -539,15 +562,24 @@
               const emailVal = form.querySelector('[name="email"]').value.trim();
 
               submitBtn.disabled = true;
-              submitBtn.textContent = 'Submitting…';
+              submitBtn.textContent = coldStartMessages[0];
 
-              fetch(SIGNUP_API, {
+              // Cycle through messages so it doesn't look frozen on cold start
+              var msgIndex = 1;
+              var msgTimer = setInterval(function() {
+                if (msgIndex < coldStartMessages.length) {
+                  submitBtn.textContent = coldStartMessages[msgIndex++];
+                }
+              }, 8000);
+
+              fetchWithTimeout(SIGNUP_API, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: nameVal, email: emailVal })
-              })
+              }, SIGNUP_TIMEOUT_MS)
               .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
               .then(function(result) {
+                clearInterval(msgTimer);
                 if (result.ok) {
                   document.getElementById('modal-form-container').innerHTML =
                     '<p style="font-family: Fraunces, serif; font-size: 22px; font-weight: 700; text-align: center; padding: 32px 0;">You\'re in. Moses will be in touch within 24 hours with your access details.</p>';
@@ -564,9 +596,11 @@
                 }
               })
               .catch(function() {
+                clearInterval(msgTimer);
                 submitBtn.disabled = false;
                 submitBtn.textContent = currentCTA;
-                alert('Could not reach the server. Please email moses@freeholdtools.com directly.');
+                document.getElementById('modal-form-container').innerHTML =
+                  '<p style="font-family: Fraunces, serif; font-size: 16px; text-align: center; padding: 24px 0; line-height: 1.7;">Having trouble connecting. Email <a href="mailto:moses@freeholdtools.com" style="color: var(--orange);">moses@freeholdtools.com</a> directly and you\'ll get access within 24 hours.</p>';
               });
             });
           }

@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { db } from '../db.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
+
+// All routes require authentication
+router.use(requireAuth);
 
 /**
  * GET /api/analytics/overview
@@ -11,11 +15,11 @@ router.get('/overview', (req, res, next) => {
   try {
     const stats = db.prepare(`
       SELECT
-        (SELECT COUNT(*) FROM contacts) as total_contacts,
-        (SELECT COUNT(*) FROM lists) as total_lists,
-        (SELECT COUNT(*) FROM campaigns WHERE status = 'sent') as campaigns_sent,
-        (SELECT COUNT(*) FROM campaign_sends WHERE status = 'sent') as total_emails_sent
-    `).get();
+        (SELECT COUNT(*) FROM contacts WHERE user_id = ?) as total_contacts,
+        (SELECT COUNT(*) FROM lists WHERE user_id = ?) as total_lists,
+        (SELECT COUNT(*) FROM campaigns WHERE user_id = ? AND status = 'sent') as campaigns_sent,
+        (SELECT COUNT(*) FROM campaign_sends cs WHERE status = 'sent' AND campaign_id IN (SELECT id FROM campaigns WHERE user_id = ?)) as total_emails_sent
+    `).get(req.user.userId, req.user.userId, req.user.userId, req.user.userId);
 
     res.json(stats);
   } catch (error) {
@@ -57,9 +61,9 @@ router.get('/campaign-performance', (req, res, next) => {
         c.sent_at
       FROM campaigns c
       LEFT JOIN events e ON c.id = e.campaign_id AND e.created_at > datetime('now', '-' || ? || ' days')
-      WHERE 1=1
+      WHERE c.user_id = ?
     `;
-    const params = [days];
+    const params = [days, req.user.userId];
 
     if (campaignId) {
       query += ' AND c.id = ?';
@@ -92,36 +96,41 @@ router.get('/events', (req, res, next) => {
     const limit = Math.min(parseInt(req.query.limit) || 50, 500);
     const offset = parseInt(req.query.offset) || 0;
 
-    let countQuery = 'SELECT COUNT(*) as total FROM events WHERE 1=1';
+    let countQuery = `SELECT COUNT(*) as total FROM events e
+                      WHERE campaign_id IN (SELECT id FROM campaigns WHERE user_id = ?)`;
     let query = `
       SELECT
-        id, event_type, message_id, campaign_id, contact_id, email, recipient,
-        opens_count, clicks_count, bounces_count, created_at, received_at
-      FROM events
-      WHERE 1=1
+        e.id, e.event_type, e.message_id, e.campaign_id, e.contact_id, e.email, e.recipient,
+        e.opens_count, e.clicks_count, e.bounces_count, e.created_at, e.received_at
+      FROM events e
+      WHERE e.campaign_id IN (SELECT id FROM campaigns WHERE user_id = ?)
     `;
-    const params = [];
+    const params = [req.user.userId];
+    const countParams = [req.user.userId];
 
     if (eventType) {
-      countQuery += ' AND event_type = ?';
-      query += ' AND event_type = ?';
+      countQuery += ' AND e.event_type = ?';
+      query += ' AND e.event_type = ?';
+      countParams.push(eventType);
       params.push(eventType);
     }
 
     if (campaignId) {
-      countQuery += ' AND campaign_id = ?';
-      query += ' AND campaign_id = ?';
+      countQuery += ' AND e.campaign_id = ?';
+      query += ' AND e.campaign_id = ?';
+      countParams.push(parseInt(campaignId));
       params.push(parseInt(campaignId));
     }
 
     if (contactId) {
-      countQuery += ' AND contact_id = ?';
-      query += ' AND contact_id = ?';
+      countQuery += ' AND e.contact_id = ?';
+      query += ' AND e.contact_id = ?';
+      countParams.push(parseInt(contactId));
       params.push(parseInt(contactId));
     }
 
-    const countResult = db.prepare(countQuery).get(...params);
-    const events = db.prepare(`${query} ORDER BY created_at DESC LIMIT ? OFFSET ?`)
+    const countResult = db.prepare(countQuery).get(...countParams);
+    const events = db.prepare(`${query} ORDER BY e.created_at DESC LIMIT ? OFFSET ?`)
       .all(...params, limit, offset);
 
     res.json({
@@ -145,15 +154,15 @@ router.get('/summary', (req, res, next) => {
   try {
     const summary = db.prepare(`
       SELECT
-        (SELECT COUNT(*) FROM contacts) as total_contacts,
-        (SELECT COUNT(*) FROM lists) as total_lists,
-        (SELECT COUNT(*) FROM campaigns WHERE status = 'sent') as campaigns_sent,
-        (SELECT COUNT(*) FROM campaign_sends WHERE status = 'sent' AND sent_at > datetime('now', '-7 days')) as emails_sent_7d,
-        (SELECT COUNT(*) FROM events WHERE event_type = 'open' AND created_at > datetime('now', '-7 days')) as opens_7d,
-        (SELECT COUNT(*) FROM events WHERE event_type = 'click' AND created_at > datetime('now', '-7 days')) as clicks_7d,
-        (SELECT COUNT(*) FROM events WHERE event_type = 'bounce' AND created_at > datetime('now', '-7 days')) as bounces_7d,
-        (SELECT COUNT(*) FROM events WHERE event_type IN ('spam', 'unsubscribe') AND created_at > datetime('now', '-7 days')) as complaints_7d
-    `).get();
+        (SELECT COUNT(*) FROM contacts WHERE user_id = ?) as total_contacts,
+        (SELECT COUNT(*) FROM lists WHERE user_id = ?) as total_lists,
+        (SELECT COUNT(*) FROM campaigns WHERE user_id = ? AND status = 'sent') as campaigns_sent,
+        (SELECT COUNT(*) FROM campaign_sends cs WHERE status = 'sent' AND sent_at > datetime('now', '-7 days') AND campaign_id IN (SELECT id FROM campaigns WHERE user_id = ?)) as emails_sent_7d,
+        (SELECT COUNT(*) FROM events WHERE event_type = 'open' AND created_at > datetime('now', '-7 days') AND campaign_id IN (SELECT id FROM campaigns WHERE user_id = ?)) as opens_7d,
+        (SELECT COUNT(*) FROM events WHERE event_type = 'click' AND created_at > datetime('now', '-7 days') AND campaign_id IN (SELECT id FROM campaigns WHERE user_id = ?)) as clicks_7d,
+        (SELECT COUNT(*) FROM events WHERE event_type = 'bounce' AND created_at > datetime('now', '-7 days') AND campaign_id IN (SELECT id FROM campaigns WHERE user_id = ?)) as bounces_7d,
+        (SELECT COUNT(*) FROM events WHERE event_type IN ('spam', 'unsubscribe') AND created_at > datetime('now', '-7 days') AND campaign_id IN (SELECT id FROM campaigns WHERE user_id = ?)) as complaints_7d
+    `).get(req.user.userId, req.user.userId, req.user.userId, req.user.userId, req.user.userId, req.user.userId, req.user.userId, req.user.userId);
 
     res.json(summary);
   } catch (error) {

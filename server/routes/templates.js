@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { db } from '../db.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
+
+// All routes require authentication
+router.use(requireAuth);
 
 /**
  * GET /api/templates
@@ -11,11 +15,11 @@ router.get('/', (req, res, next) => {
   try {
     const category = req.query.category;
 
-    let query = 'SELECT id, name, category, subject, created_at FROM templates';
-    const params = [];
+    let query = 'SELECT id, name, category, subject, created_at FROM templates WHERE user_id = ? OR user_id IS NULL';
+    const params = [req.user.userId];
 
     if (category) {
-      query += ' WHERE category = ?';
+      query += ' AND category = ?';
       params.push(category);
     }
 
@@ -36,8 +40,8 @@ router.get('/', (req, res, next) => {
 router.get('/:id', (req, res, next) => {
   try {
     const template = db.prepare(`
-      SELECT id, name, category, subject, html_content, preview_vars FROM templates WHERE id = ?
-    `).get(req.params.id);
+      SELECT id, name, category, subject, html_content, preview_vars FROM templates WHERE id = ? AND (user_id = ? OR user_id IS NULL)
+    `).get(req.params.id, req.user.userId);
 
     if (!template) {
       return res.status(404).json({ error: 'Template not found' });
@@ -66,8 +70,8 @@ router.post('/preview', (req, res, next) => {
     }
 
     const template = db.prepare(`
-      SELECT subject, html_content FROM templates WHERE id = ?
-    `).get(template_id);
+      SELECT subject, html_content FROM templates WHERE id = ? AND (user_id = ? OR user_id IS NULL)
+    `).get(template_id, req.user.userId);
 
     if (!template) {
       return res.status(404).json({ error: 'Template not found' });

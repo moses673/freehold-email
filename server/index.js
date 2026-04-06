@@ -16,6 +16,8 @@ import webhooksRouter from './routes/webhooks.js';
 import analyticsRouter from './routes/analytics.js';
 import unsubscribeRouter from './routes/unsubscribe.js';
 import feedbackRouter from './routes/feedback.js';
+import paymentsRouter from './routes/payments.js';
+import signupsRouter from './routes/signups.js';
 
 // Load environment variables
 dotenv.config();
@@ -69,8 +71,14 @@ app.use('/api/webhooks', webhooksRouter);
 // Analytics routes (protected)
 app.use('/api/analytics', requireAuth, analyticsRouter);
 
+// Payment webhook and license verification (webhook is public, admin routes are protected)
+app.use('/api/payments', paymentsRouter);
+
 // Feedback routes (POST is public, GET is protected)
 app.use('/api/feedback', feedbackRouter);
+
+// Signups route (POST is public + CORS for freeholdtools.com, GET/PATCH are protected)
+app.use('/api/signups', signupsRouter);
 
 // Unsubscribe handler (public route, not under /api)
 app.use('/', unsubscribeRouter);

@@ -1,8 +1,12 @@
 import { Router } from 'express';
 import { db } from '../db.js';
 import { sendCampaign, getCampaignSendStatus } from '../services/email.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
+
+// All routes require authentication
+router.use(requireAuth);
 
 /**
  * GET /api/campaigns
@@ -29,11 +33,12 @@ router.get('/', (req, res, next) => {
       FROM campaigns c
       LEFT JOIN templates t ON c.template_id = t.id
       LEFT JOIN lists l ON c.list_id = l.id
+      WHERE c.user_id = ?
     `;
-    const params = [];
+    const params = [req.user.userId];
 
     if (status) {
-      query += ' WHERE c.status = ?';
+      query += ' AND c.status = ?';
       params.push(status);
     }
 
@@ -69,8 +74,8 @@ router.get('/:id', (req, res, next) => {
         t.name as template_name
       FROM campaigns c
       LEFT JOIN templates t ON c.template_id = t.id
-      WHERE c.id = ?
-    `).get(req.params.id);
+      WHERE c.id = ? AND c.user_id = ?
+    `).get(req.params.id, req.user.userId);
 
     if (!campaign) {
       return res.status(404).json({ error: 'Campaign not found' });
@@ -102,17 +107,18 @@ router.post('/', (req, res, next) => {
       return res.status(400).json({ error: 'list_id is required' });
     }
 
-    // Get contact count for the list
+    // Get contact count for the list (verify it belongs to user)
     const listData = db.prepare(`
-      SELECT COUNT(*) as count FROM contacts WHERE list_id = ?
-    `).get(list_id);
+      SELECT COUNT(*) as count FROM contacts WHERE list_id = ? AND user_id = ?
+    `).get(list_id, req.user.userId);
 
     const stmt = db.prepare(`
-      INSERT INTO campaigns (name, template_id, list_id, subject, html_content, recipients_count)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO campaigns (user_id, name, template_id, list_id, subject, html_content, recipients_count)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
 
     const info = stmt.run(
+      req.user.userId,
       name.trim(),
       template_id,
       list_id,
@@ -136,8 +142,8 @@ router.post('/', (req, res, next) => {
         t.name as template_name
       FROM campaigns c
       LEFT JOIN templates t ON c.template_id = t.id
-      WHERE c.id = ?
-    `).get(info.lastInsertRowid);
+      WHERE c.id = ? AND c.user_id = ?
+    `).get(info.lastInsertRowid, req.user.userId);
 
     res.status(201).json(campaign);
   } catch (error) {
@@ -154,7 +160,7 @@ router.put('/:id', (req, res, next) => {
     const id = req.params.id;
     const { name, subject, html_content } = req.body;
 
-    const campaign = db.prepare('SELECT status FROM campaigns WHERE id = ?').get(id);
+    const campaign = db.prepare('SELECT status FROM campaigns WHERE id = ? AND user_id = ?').get(id, req.user.userId);
 
     if (!campaign) {
       return res.status(404).json({ error: 'Campaign not found' });
@@ -167,14 +173,15 @@ router.put('/:id', (req, res, next) => {
     const stmt = db.prepare(`
       UPDATE campaigns
       SET name = ?, subject = ?, html_content = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
+      WHERE id = ? AND user_id = ?
     `);
 
     stmt.run(
       name !== undefined ? name : undefined,
       subject !== undefined ? subject : undefined,
       html_content !== undefined ? html_content : undefined,
-      id
+      id,
+      req.user.userId
     );
 
     const updated = db.prepare(`
@@ -192,8 +199,8 @@ router.put('/:id', (req, res, next) => {
         t.name as template_name
       FROM campaigns c
       LEFT JOIN templates t ON c.template_id = t.id
-      WHERE c.id = ?
-    `).get(id);
+      WHERE c.id = ? AND c.user_id = ?
+    `).get(id, req.user.userId);
 
     res.json(updated);
   } catch (error) {
@@ -212,8 +219,8 @@ router.post('/:id/send', async (req, res, next) => {
     const campaign = db.prepare(`
       SELECT c.id, c.status, c.list_id, c.subject, c.html_content
       FROM campaigns c
-      WHERE c.id = ?
-    `).get(campaignId);
+      WHERE c.id = ? AND c.user_id = ?
+    `).get(campaignId, req.user.userId);
 
     if (!campaign) {
       return res.status(404).json({ error: 'Campaign not found' });
@@ -225,8 +232,8 @@ router.post('/:id/send', async (req, res, next) => {
 
     // Get all unsubscribed contacts in the list (skip unsubscribed ones)
     const contacts = db.prepare(`
-      SELECT email FROM contacts WHERE list_id = ? AND (unsubscribed IS NULL OR unsubscribed = 0)
-    `).all(campaign.list_id);
+      SELECT email FROM contacts WHERE list_id = ? AND user_id = ? AND (unsubscribed IS NULL OR unsubscribed = 0)
+    `).all(campaign.list_id, req.user.userId);
 
     if (contacts.length === 0) {
       return res.status(400).json({ error: 'No contacts in the selected list' });
@@ -272,8 +279,8 @@ router.get('/:id/status', (req, res, next) => {
 router.get('/:id/preview', (req, res, next) => {
   try {
     const campaign = db.prepare(`
-      SELECT subject, html_content FROM campaigns WHERE id = ?
-    `).get(req.params.id);
+      SELECT subject, html_content FROM campaigns WHERE id = ? AND user_id = ?
+    `).get(req.params.id, req.user.userId);
 
     if (!campaign) {
       return res.status(404).json({ error: 'Campaign not found' });

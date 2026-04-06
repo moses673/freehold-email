@@ -2,8 +2,12 @@ import { Router } from 'express';
 import { db } from '../db.js';
 import { sendWelcomeEmail } from '../services/email.js';
 import { contactsToCsv, validateContactsFromCsv } from '../services/csv.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
+
+// All routes require authentication
+router.use(requireAuth);
 
 const PAGE_SIZE = 50;
 
@@ -18,8 +22,8 @@ router.get('/', (req, res, next) => {
     const listId = req.query.list_id;
     const tag = req.query.tag;
 
-    let query = 'SELECT * FROM contacts WHERE 1=1';
-    const params = [];
+    let query = 'SELECT * FROM contacts WHERE user_id = ?';
+    const params = [req.user.userId];
 
     if (search) {
       query += ' AND (email LIKE ? OR first_name LIKE ? OR last_name LIKE ?)';
@@ -37,8 +41,8 @@ router.get('/', (req, res, next) => {
       params.push(`%${tag}%`);
     }
 
-    const countQuery = `SELECT COUNT(*) as total FROM contacts WHERE 1=1`;
-    const total = db.prepare(countQuery).get().total;
+    const countQuery = `SELECT COUNT(*) as total FROM contacts WHERE user_id = ?`;
+    const total = db.prepare(countQuery).get(req.user.userId).total;
 
     const offset = (page - 1) * PAGE_SIZE;
     query += ` ORDER BY created_at DESC LIMIT ${PAGE_SIZE} OFFSET ${offset}`;
@@ -71,7 +75,7 @@ router.get('/', (req, res, next) => {
  */
 router.get('/:id', (req, res, next) => {
   try {
-    const contact = db.prepare('SELECT * FROM contacts WHERE id = ?').get(req.params.id);
+    const contact = db.prepare('SELECT * FROM contacts WHERE id = ? AND user_id = ?').get(req.params.id, req.user.userId);
 
     if (!contact) {
       return res.status(404).json({ error: 'Contact not found' });
@@ -99,12 +103,13 @@ router.post('/', (req, res, next) => {
     }
 
     const stmt = db.prepare(`
-      INSERT INTO contacts (email, first_name, last_name, list_id, tags)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO contacts (user_id, email, first_name, last_name, list_id, tags)
+      VALUES (?, ?, ?, ?, ?, ?)
     `);
 
     try {
       const info = stmt.run(
+        req.user.userId,
         email.toLowerCase().trim(),
         first_name || null,
         last_name || null,
@@ -112,7 +117,7 @@ router.post('/', (req, res, next) => {
         JSON.stringify(tags || [])
       );
 
-      const contact = db.prepare('SELECT * FROM contacts WHERE id = ?').get(info.lastInsertRowid);
+      const contact = db.prepare('SELECT * FROM contacts WHERE id = ? AND user_id = ?').get(info.lastInsertRowid, req.user.userId);
       contact.tags = contact.tags ? JSON.parse(contact.tags) : [];
 
       // Send welcome email asynchronously if list has a welcome template
@@ -145,7 +150,7 @@ router.put('/:id', (req, res, next) => {
     const stmt = db.prepare(`
       UPDATE contacts
       SET email = ?, first_name = ?, last_name = ?, list_id = ?, tags = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
+      WHERE id = ? AND user_id = ?
     `);
 
     try {
@@ -155,10 +160,11 @@ router.put('/:id', (req, res, next) => {
         last_name !== undefined ? last_name : undefined,
         list_id !== undefined ? list_id : undefined,
         tags !== undefined ? JSON.stringify(tags) : undefined,
-        id
+        id,
+        req.user.userId
       );
 
-      const contact = db.prepare('SELECT * FROM contacts WHERE id = ?').get(id);
+      const contact = db.prepare('SELECT * FROM contacts WHERE id = ? AND user_id = ?').get(id, req.user.userId);
 
       if (!contact) {
         return res.status(404).json({ error: 'Contact not found' });
@@ -183,8 +189,8 @@ router.put('/:id', (req, res, next) => {
  */
 router.delete('/:id', (req, res, next) => {
   try {
-    const stmt = db.prepare('DELETE FROM contacts WHERE id = ?');
-    const info = stmt.run(req.params.id);
+    const stmt = db.prepare('DELETE FROM contacts WHERE id = ? AND user_id = ?');
+    const info = stmt.run(req.params.id, req.user.userId);
 
     if (info.changes === 0) {
       return res.status(404).json({ error: 'Contact not found' });
@@ -221,8 +227,8 @@ router.post('/import', (req, res, next) => {
 
     // Bulk insert
     const insertStmt = db.prepare(`
-      INSERT OR REPLACE INTO contacts (email, first_name, last_name, list_id, tags)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT OR REPLACE INTO contacts (user_id, email, first_name, last_name, list_id, tags)
+      VALUES (?, ?, ?, ?, ?, ?)
     `);
 
     const transaction = db.transaction((contactList) => {
@@ -230,10 +236,11 @@ router.post('/import', (req, res, next) => {
       let updated = 0;
 
       for (const contact of contactList) {
-        const existing = db.prepare('SELECT id FROM contacts WHERE email = ?').get(contact.email);
+        const existing = db.prepare('SELECT id FROM contacts WHERE user_id = ? AND email = ?').get(req.user.userId, contact.email);
 
         try {
           insertStmt.run(
+            req.user.userId,
             contact.email,
             contact.first_name,
             contact.last_name,
@@ -277,11 +284,11 @@ router.get('/export', (req, res, next) => {
   try {
     const listId = req.query.list_id;
 
-    let query = 'SELECT email, first_name, last_name, tags FROM contacts';
-    const params = [];
+    let query = 'SELECT email, first_name, last_name, tags FROM contacts WHERE user_id = ?';
+    const params = [req.user.userId];
 
     if (listId) {
-      query += ' WHERE list_id = ?';
+      query += ' AND list_id = ?';
       params.push(parseInt(listId));
     }
 

@@ -8,6 +8,7 @@ import TemplatesPage from './pages/TemplatesPage';
 import CampaignPage from './pages/CampaignPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import DomainVerificationPage from './pages/DomainVerificationPage';
+import SignupsPage from './pages/SignupsPage';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('contacts');
@@ -45,6 +46,7 @@ export default function App() {
         {currentPage === 'campaigns' && <CampaignPage />}
         {currentPage === 'analytics' && <AnalyticsPage />}
         {currentPage === 'domains' && <DomainVerificationPage />}
+        {currentPage === 'signups' && <SignupsPage />}
       </main>
       <FeedbackWidget />
     </div>

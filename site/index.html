@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freehold — The Dispatch</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@6..72,600;6..72,700;6..72,800;6..72,900&amp;family=Public+Sans:wght@400;500&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --paper: #F9F7F2;
+            --ink: #1A1B1E;
+            --orange: #FF5C00;
+            --navy: #2D4A63;
+            --border: rgba(26,27,30,0.15);
+        }
+
+        body {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Public Sans', sans-serif;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* MASTHEAD */
+        .masthead {
+            padding: 48px 48px 32px;
+            text-align: center;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .masthead-title {
+            font-family: 'Fraunces', serif;
+            font-size: 48px;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 24px;
+            letter-spacing: 0.02em;
+        }
+
+        .masthead-divider {
+            width: 100%;
+            height: 0.5px;
+            background: var(--border);
+            margin-bottom: 24px;
+        }
+
+        .masthead-subbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 32px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .masthead-subbar a {
+            color: var(--ink);
+            text-decoration: none;
+            border-right: 0.5px solid var(--border);
+            padding-right: 32px;
+        }
+
+        .masthead-subbar a:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+
+        .masthead-subbar .offer {
+            color: var(--orange);
+            font-weight: 600;
+        }
+
+        /* HERO HEADLINE */
+        .hero-headline {
+            padding: 60px 48px 40px;
+            text-align: center;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .hero-headline h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 56px;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 40px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* THREE-COLUMN LAYOUT */
+        .hero-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            padding: 60px 48px;
+            border-bottom: 0.5px solid var(--border);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .hero-column {
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .hero-column p {
+            margin-bottom: 16px;
+        }
+
+        .hero-column p:last-child {
+            margin-bottom: 0;
+        }
+
+        .hero-column strong {
+            font-weight: 600;
+        }
+
+        /* CLASSIFIED SIDEBAR */
+        .classified-box {
+            background: var(--paper);
+            border: 2px solid var(--ink);
+            padding: 32px;
+            margin: 60px 0;
+        }
+
+        .classified-header {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .classified-content {
+            text-align: center;
+        }
+
+        .classified-price {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .classified-desc {
+            font-size: 14px;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            background: var(--orange);
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            font-family: 'Public Sans', sans-serif;
+            font-weight: 500;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 0;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+
+        .cta-button:hover {
+            background: #e64a00;
+        }
+
+        /* MODAL */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        #signup-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26,27,30,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal-box {
+            background: var(--paper);
+            border: 1px solid var(--ink);
+            border-radius: 0;
+            max-width: 480px;
+            width: 100%;
+            padding: 48px;
+            position: relative;
+            box-shadow: none;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--ink);
+            cursor: pointer;
+            font-weight: 300;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: var(--orange);
+        }
+
+        #modal-heading {
+            font-family: 'Fraunces', serif;
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            margin-top: 0;
+        }
+
+        #modal-sub {
+            font-family: 'Public Sans', sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--ink);
+            margin-bottom: 32px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--ink);
+            border-radius: 0;
+            background: var(--paper);
+            font-family: 'Public Sans', sans-serif;
+            font-size: 15px;
+            color: var(--ink);
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        .modal-input:focus {
+            border-color: var(--orange);
+        }
+
+        .modal-input::placeholder {
+            color: rgba(26,27,30,0.5);
+        }
+
+        #signup-form {
+            margin-bottom: 24px;
+        }
+
+        #modal-submit-btn {
+            width: 100%;
+            background: var(--orange);
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            font-family: 'Public Sans', sans-serif;
+            font-weight: 500;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 0;
+            transition: background 0.2s;
+        }
+
+        #modal-submit-btn:hover {
+            background: #e64a00;
+        }
+
+        .modal-footer {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--ink);
+            text-align: center;
+        }
+
+        /* TWO-COLUMN EDITORIAL */
+        .editorial {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            padding: 60px 48px;
+            border-bottom: 0.5px solid var(--border);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .editorial-column {
+            border: 0.5px solid var(--border);
+            padding: 48px;
+        }
+
+        .editorial-column h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 32px;
+        }
+
+        .editorial-column h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 24px 0 12px;
+        }
+
+        .editorial-column p {
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .editorial-column .subheading {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--navy);
+            margin-bottom: 32px;
+        }
+
+        /* FOOTER */
+        footer {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 48px;
+            padding: 60px 48px;
+            border-top: 0.5px solid var(--border);
+            font-size: 13px;
+        }
+
+        footer h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        footer ul {
+            list-style: none;
+        }
+
+        footer li {
+            margin-bottom: 8px;
+        }
+
+        footer a {
+            color: var(--ink);
+            text-decoration: none;
+            border-bottom: 0.5px solid var(--border);
+            padding-bottom: 2px;
+        }
+
+        footer a:hover {
+            color: var(--orange);
+        }
+
+        footer .copy {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--navy);
+            text-align: center;
+            grid-column: 1 / -1;
+            padding-top: 32px;
+            border-top: 0.5px solid var(--border);
+        }
+
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                padding: 60px 48px;
+            }
+
+            .editorial {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            footer {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            footer .copy {
+                grid-column: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .masthead {
+                padding: 32px 24px;
+            }
+
+            .masthead-title {
+                font-size: 36px;
+            }
+
+            .masthead-subbar {
+                gap: 16px;
+                flex-wrap: wrap;
+            }
+
+            .masthead-subbar a {
+                padding-right: 16px;
+            }
+
+            .hero-headline {
+                padding: 40px 24px;
+            }
+
+            .hero-headline h1 {
+                font-size: 40px;
+            }
+
+            .hero-content {
+                padding: 40px 24px;
+                grid-template-columns: 1fr;
+            }
+
+            .editorial {
+                padding: 40px 24px;
+                gap: 32px;
+            }
+
+            .editorial-column {
+                padding: 32px;
+            }
+
+            footer {
+                padding: 40px 24px;
+                gap: 32px;
+            }
+        }
+    
+
+      @keyframes claude-pulse {
+        0% {
+          box-shadow: 
+            inset 0 0 10px rgba(217, 119, 87, 0.5),
+            inset 0 0 20px rgba(217, 119, 87, 0.3),
+            inset 0 0 30px rgba(217, 119, 87, 0.1);
+        }
+        50% {
+          box-shadow: 
+            inset 0 0 15px rgba(217, 119, 87, 0.7),
+            inset 0 0 25px rgba(217, 119, 87, 0.5),
+            inset 0 0 35px rgba(217, 119, 87, 0.2);
+        }
+        100% {
+          box-shadow: 
+            inset 0 0 10px rgba(217, 119, 87, 0.5),
+            inset 0 0 20px rgba(217, 119, 87, 0.3),
+            inset 0 0 30px rgba(217, 119, 87, 0.1);
+        }
+      }
+    </style>
+</head>
+<body>
+    <script>
+        const PRICING_CONFIG = {
+          tiers: [
+            { maxUsers: 20,   price: 0,  label: "FOUNDING USER",  cta: "Claim Your Free Copy" },
+            { maxUsers: 70,   price: 29, label: "EARLY ADOPTER",  cta: "Start Free 7-Day Trial" },
+            { maxUsers: 170,  price: 49, label: "EARLY ADOPTER",  cta: "Start Free 7-Day Trial" },
+            { maxUsers: 370,  price: 69, label: "GROWTH",         cta: "Start Free 7-Day Trial" },
+            { maxUsers: 1370, price: 99, label: "STANDARD",       cta: "Start Free 7-Day Trial" },
+          ],
+          currentUserCount: 0, // ← only this number needs to change to update pricing site-wide
+        };
+
+        // Compute current tier
+        const currentTier = PRICING_CONFIG.tiers.find(t => PRICING_CONFIG.currentUserCount <= t.maxUsers);
+        const currentPrice = currentTier.price;
+        const currentLabel = currentTier.label;
+        const currentCTA = currentTier.cta;
+        const priceDisplay = currentPrice === 0 ? "$0.00 — FREE" : `$${currentPrice}.00 — ONE-TIME`;
+
+        // Inject into any element with data-dynamic="price", data-dynamic="label", data-dynamic="cta"
+        document.addEventListener('DOMContentLoaded', () => {
+          document.querySelectorAll('[data-dynamic="price"]').forEach(el => el.textContent = priceDisplay);
+          document.querySelectorAll('[data-dynamic="label"]').forEach(el => el.textContent = currentLabel);
+          document.querySelectorAll('[data-dynamic="cta"]').forEach(el => el.textContent = currentCTA);
+
+          // Wire up modal functionality
+          function openSignupModal() {
+            document.getElementById('signup-modal').style.display = 'flex';
+            // Populate hidden tier field
+            document.getElementById('modal-tier-hidden').value = currentLabel;
+            // Update modal heading and subtext based on tier
+            document.getElementById('modal-heading').textContent =
+              currentPrice === 0 ? 'Claim Your Founding Copy' : 'Start Your Free 7-Day Trial';
+            document.getElementById('modal-sub').textContent =
+              currentPrice === 0
+                ? "You're one of the first 20. Freehold Email is yours, free, permanently."
+                : "No credit card required. Try it free for 7 days, then pay once — " + priceDisplay + ".";
+            document.getElementById('modal-submit-btn').textContent = currentCTA;
+          }
+
+          function closeSignupModal() {
+            document.getElementById('signup-modal').style.display = 'none';
+          }
+
+          // Close on backdrop click
+          const modal = document.getElementById('signup-modal');
+          modal.addEventListener('click', function(e) {
+            if (e.target === this) closeSignupModal();
+          });
+
+          // Handle form submission — POST to Freehold backend
+          const SIGNUP_API = 'https://freehold-email.onrender.com/api/signups';
+          const form = document.getElementById('signup-form');
+          if (form) {
+            form.addEventListener('submit', function(e) {
+              e.preventDefault();
+              const submitBtn = document.getElementById('modal-submit-btn');
+              const nameVal = form.querySelector('[name="name"]').value.trim();
+              const emailVal = form.querySelector('[name="email"]').value.trim();
+
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Submitting…';
+
+              fetch(SIGNUP_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: nameVal, email: emailVal })
+              })
+              .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+              .then(function(result) {
+                if (result.ok) {
+                  document.getElementById('modal-form-container').innerHTML =
+                    '<p style="font-family: Fraunces, serif; font-size: 22px; font-weight: 700; text-align: center; padding: 32px 0;">You\'re in. Moses will be in touch within 24 hours with your access details.</p>';
+                } else if (result.data.error === 'already_registered') {
+                  document.getElementById('modal-form-container').innerHTML =
+                    '<p style="font-family: Fraunces, serif; font-size: 22px; font-weight: 700; text-align: center; padding: 32px 0;">This email has already claimed a founding copy. Check your inbox for Moses\'s message.</p>';
+                } else if (result.data.error === 'founding_limit_reached') {
+                  document.getElementById('modal-form-container').innerHTML =
+                    '<p style="font-family: Fraunces, serif; font-size: 22px; font-weight: 700; text-align: center; padding: 32px 0;">The founding offer is now closed — all 20 slots are taken. Early adopter pricing opens next.</p>';
+                } else {
+                  submitBtn.disabled = false;
+                  submitBtn.textContent = currentCTA;
+                  alert('Something went wrong. Please try again or email moses@freeholdtools.com.');
+                }
+              })
+              .catch(function() {
+                submitBtn.disabled = false;
+                submitBtn.textContent = currentCTA;
+                alert('Could not reach the server. Please email moses@freeholdtools.com directly.');
+              });
+            });
+          }
+
+          // Make openSignupModal available globally
+          window.openSignupModal = openSignupModal;
+          window.closeSignupModal = closeSignupModal;
+        });
+    </script>
+
+    <!-- MASTHEAD -->
+    <div class="masthead">
+        <div class="masthead-title">FREEHOLD TOOLS</div>
+        <div class="masthead-divider"></div>
+        <div class="masthead-subbar">
+            <a href="#about">About</a>
+            <a href="#product">Product</a>
+            <a href="#pricing">Pricing</a>
+            <span class="offer">FOUNDING OFFER — LIMITED SLOTS AVAILABLE</span>
+        </div>
+    </div>
+
+    <!-- HERO HEADLINE -->
+    <div class="hero-headline" id="product">
+        <h1>You Don't Own Your Software. We're Changing That.</h1>
+    </div>
+
+    <!-- THREE-COLUMN CONTENT -->
+    <div class="hero-content">
+        <div class="hero-column">
+            <p><strong>Every email tool is a subscription.</strong> Subscription email platforms. ConvertKit. ActiveCampaign. You use them. You pay monthly. You own nothing. If they decide to shut down, raise prices, or change features, you have no recourse.</p>
+        </div>
+
+        <div class="hero-column">
+            <p><strong>Freehold Email is different.</strong> It's a one-time purchase. <span data-dynamic="price">$0.00 — FREE</span>. You own it forever. No monthly fees. No renewal. No kill-switch. Your email tool is yours to keep and use indefinitely.</p>
+        </div>
+
+        <div class="hero-column">
+            <p><strong>This is permanent software.</strong> The kind that used to exist before SaaS. You pay once. You own it. You control it. It's not a service. It's an asset.</p>
+        </div>
+    </div>
+
+    <!-- CLASSIFIED OFFERING -->
+    <div style="padding: 0 48px;" id="pricing">
+        <div class="classified-box">
+            <div class="classified-header"><span data-dynamic="label">FOUNDING USER</span> OFFER</div>
+            <div class="classified-content">
+                <div class="classified-price"><span data-dynamic="price">$0.00 — FREE</span></div>
+                <div class="classified-desc">First 20 users get permanent access for free. After launch, $29 one time.</div>
+                <button class="cta-button" onclick="openSignupModal()"><span data-dynamic="cta">Claim Your Free Copy</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDITORIAL COLUMNS -->
+    <div class="editorial" id="about">
+        <div class="editorial-column">
+            <div class="subheading">OPINION</div>
+            <h2>The Problem with SaaS</h2>
+            <h3>You're on a treadmill.</h3>
+            <p>SaaS companies make money through recurring revenue. Monthly subscriptions. Annual contracts. The business model depends on locking you in and raising prices incrementally.</p>
+            <h3>Every year, prices go up.</h3>
+            <p>Subscription email platforms pricing has increased 15-30% per year for the last five years. A tool that cost $20/month in 2020 now costs $50-100/month for the same features.</p>
+            <h3>You can't escape.</h3>
+            <p>Your subscriber data is locked inside their platform. Your workflows depend on their integrations. Migrating to a competitor costs time and money. You're trapped.</p>
+        </div>
+
+        <div class="editorial-column">
+            <div class="subheading">SOLUTION</div>
+            <h2>The Freehold Alternative</h2>
+            <h3>One payment. Forever.</h3>
+            <p>Freehold Email costs $29. One time. That price never changes. You own the software permanently. It's not a service subscription — it's a product you purchase.</p>
+            <h3>Your data stays yours.</h3>
+            <p>We're not monetizing your subscriber list. We're not running your data through AI models. We're not selling analytics to third parties. Your data is completely under your control.</p>
+            <h3>You're in control.</h3>
+            <p>If we change direction, get acquired, or shut down, you keep using what you paid for. No lock-in. No kill-switch. No surprise migrations. You own your tool outright.</p>
+        </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div id="features" style="padding: 60px 48px; border-bottom: 0.5px solid var(--border); max-width: 1400px; margin: 0 auto;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy); margin-bottom: 16px;">PRODUCT</div>
+        <h2 style="font-family: 'Fraunces', serif; font-size: 40px; font-weight: 900; margin-bottom: 48px;">What's Included</h2>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
+            <div style="border-top: 2px solid var(--ink); padding-top: 24px;">
+                <h3 style="font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Contact Management</h3>
+                <p style="font-size: 14px; line-height: 1.8; color: #444;">Import contacts via CSV, add them manually, tag and segment them into lists. Full ownership of your subscriber data — no export limits, no hostage situations.</p>
+            </div>
+            <div style="border-top: 2px solid var(--ink); padding-top: 24px;">
+                <h3 style="font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Email Templates</h3>
+                <p style="font-size: 14px; line-height: 1.8; color: #444;">Build reusable HTML email templates. Preset templates included for newsletters, welcome emails, announcements, and promotions. Edit freely, save permanently.</p>
+            </div>
+            <div style="border-top: 2px solid var(--ink); padding-top: 24px;">
+                <h3 style="font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Campaign Sending</h3>
+                <p style="font-size: 14px; line-height: 1.8; color: #444;">Send campaigns to any list using any template. Powered by Postmark for high deliverability. You bring your own Postmark API key — you control the sending infrastructure.</p>
+            </div>
+            <div style="border-top: 2px solid var(--ink); padding-top: 24px;">
+                <h3 style="font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Analytics</h3>
+                <p style="font-size: 14px; line-height: 1.8; color: #444;">Track open rates, click rates, bounces, and unsubscribes per campaign. No third-party tracking pixels sold to advertisers. Your data stays in your database.</p>
+            </div>
+            <div style="border-top: 2px solid var(--ink); padding-top: 24px;">
+                <h3 style="font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Unsubscribe Handling</h3>
+                <p style="font-size: 14px; line-height: 1.8; color: #444;">One-click unsubscribe links are automatically added to every outgoing email. CAN-SPAM compliant by default. Unsubscribes are honored immediately and stored permanently.</p>
+            </div>
+            <div style="border-top: 2px solid var(--ink); padding-top: 24px;">
+                <h3 style="font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Domain Verification</h3>
+                <p style="font-size: 14px; line-height: 1.8; color: #444;">Verify your sending domain with DKIM and SPF directly from the app. Proper authentication means your emails land in inboxes, not spam folders.</p>
+            </div>
+        </div>
+        <div style="margin-top: 48px; text-align: center;">
+            <button class="cta-button" onclick="openSignupModal()"><span data-dynamic="cta">Claim Your Free Copy</span></button>
+        </div>
+    </div>
+
+    <!-- DOCUMENTATION -->
+    <div id="docs" style="padding: 60px 48px; border-bottom: 0.5px solid var(--border); max-width: 1400px; margin: 0 auto;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy); margin-bottom: 16px;">DOCUMENTATION</div>
+        <h2 style="font-family: 'Fraunces', serif; font-size: 40px; font-weight: 900; margin-bottom: 48px;">Getting Started</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px;">
+            <div>
+                <h3 style="font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; margin-bottom: 24px;">Setup in four steps</h3>
+                <div style="margin-bottom: 24px; display: flex; gap: 16px;">
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--orange); min-width: 28px;">01</div>
+                    <div>
+                        <p style="font-weight: 600; margin-bottom: 4px;">Claim your copy</p>
+                        <p style="font-size: 14px; color: #444; line-height: 1.7;">Submit the form above. Moses will send you access credentials within 24 hours.</p>
+                    </div>
+                </div>
+                <div style="margin-bottom: 24px; display: flex; gap: 16px;">
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--orange); min-width: 28px;">02</div>
+                    <div>
+                        <p style="font-weight: 600; margin-bottom: 4px;">Create a free Postmark account</p>
+                        <p style="font-size: 14px; color: #444; line-height: 1.7;">Postmark handles email delivery. Their free tier sends up to 100 emails/month. Paid plans start at $15/month for 10,000 sends — you pay Postmark directly, not us.</p>
+                    </div>
+                </div>
+                <div style="margin-bottom: 24px; display: flex; gap: 16px;">
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--orange); min-width: 28px;">03</div>
+                    <div>
+                        <p style="font-weight: 600; margin-bottom: 4px;">Verify your sending domain</p>
+                        <p style="font-size: 14px; color: #444; line-height: 1.7;">Add a DKIM DNS record to your domain. The app walks you through it. Takes about five minutes.</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 16px;">
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--orange); min-width: 28px;">04</div>
+                    <div>
+                        <p style="font-weight: 600; margin-bottom: 4px;">Import your contacts and send</p>
+                        <p style="font-size: 14px; color: #444; line-height: 1.7;">Upload a CSV or add contacts manually. Pick a template, create a campaign, and send. That's it.</p>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h3 style="font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; margin-bottom: 24px;">Frequently asked</h3>
+                <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 0.5px solid var(--border);">
+                    <p style="font-weight: 600; margin-bottom: 8px;">Do I need technical knowledge?</p>
+                    <p style="font-size: 14px; color: #444; line-height: 1.7;">No. The app runs in your browser. Setup takes about ten minutes. If you've used Mailchimp, you'll find this familiar.</p>
+                </div>
+                <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 0.5px solid var(--border);">
+                    <p style="font-weight: 600; margin-bottom: 8px;">Why Postmark? Can I use another provider?</p>
+                    <p style="font-size: 14px; color: #444; line-height: 1.7;">Postmark has industry-leading deliverability and transparent pricing. It's what we use and trust. Other provider integrations are on the roadmap.</p>
+                </div>
+                <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 0.5px solid var(--border);">
+                    <p style="font-weight: 600; margin-bottom: 8px;">What happens if Freehold shuts down?</p>
+                    <p style="font-size: 14px; color: #444; line-height: 1.7;">You keep using the tool. Your data stays in your database. We're not the infrastructure — Postmark is. If we go away, your contacts and campaigns are still yours.</p>
+                </div>
+                <div>
+                    <p style="font-weight: 600; margin-bottom: 8px;">Is there a subscriber limit?</p>
+                    <p style="font-size: 14px; color: #444; line-height: 1.7;">No. Store as many contacts as your database can hold. Sending limits are determined by your Postmark plan, not us.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BLOG -->
+    <div id="blog" style="padding: 60px 48px; border-bottom: 0.5px solid var(--border); max-width: 1400px; margin: 0 auto;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy); margin-bottom: 16px;">DISPATCHES</div>
+        <h2 style="font-family: 'Fraunces', serif; font-size: 40px; font-weight: 900; margin-bottom: 48px;">From the Editor</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px;">
+            <div style="border-top: 2px solid var(--ink); padding-top: 24px;">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--navy); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em;">April 2026 — On Ownership</div>
+                <h3 style="font-family: 'Fraunces', serif; font-size: 24px; font-weight: 800; line-height: 1.2; margin-bottom: 16px;">The Treadmill Economy, and How to Get Off It</h3>
+                <p style="font-size: 14px; line-height: 1.8; color: #444; margin-bottom: 16px;">Somewhere in the last decade, software stopped being something you own and became something you rent. The industry rebranded this as SaaS — software as a service — but the economic reality is simpler than that: you pay every month, you own nothing, and the price goes up every year.</p>
+                <p style="font-size: 14px; line-height: 1.8; color: #444;">Freehold was built on a different premise. Software should be an asset, not a liability. You should be able to build on it, depend on it, and know it will be there when you need it — without a monthly invoice that grows with your success. More dispatches coming.</p>
+            </div>
+            <div style="border-top: 2px solid var(--ink); padding-top: 24px;">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--navy); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em;">Beta Notes — April 2026</div>
+                <h3 style="font-family: 'Fraunces', serif; font-size: 24px; font-weight: 800; line-height: 1.2; margin-bottom: 16px;">What We're Building and Why It's Taking Shape Fast</h3>
+                <p style="font-size: 14px; line-height: 1.8; color: #444; margin-bottom: 16px;">Freehold Email is in early beta. The core is solid: contacts, lists, templates, campaigns, analytics, domain verification. Every piece you'd expect from a mature email tool is there, minus the monthly invoice. We're looking for our first founding users to shape the product.</p>
+                <p style="font-size: 14px; line-height: 1.8; color: #444;">Beta users get direct access to the roadmap. Every piece of feedback goes straight to engineering. If you've got opinions about how email marketing tools should work, now's the time to have them heard.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div id="contact" style="padding: 60px 48px; border-bottom: 0.5px solid var(--border); max-width: 1400px; margin: 0 auto;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy); margin-bottom: 16px;">CONTACT</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;">
+            <div>
+                <h2 style="font-family: 'Fraunces', serif; font-size: 40px; font-weight: 900; margin-bottom: 24px;">Get in Touch</h2>
+                <p style="font-size: 15px; line-height: 1.8; margin-bottom: 32px;">Questions about the product, the beta, or just want to talk about the state of software ownership? Moses reads every email.</p>
+                <div style="border-top: 0.5px solid var(--border); padding-top: 24px;">
+                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; color: var(--navy);">General &amp; Beta Inquiries</p>
+                    <a href="mailto:moses@freeholdtools.com" style="font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; color: var(--ink); text-decoration: none; border-bottom: 2px solid var(--orange); padding-bottom: 2px;">moses@freeholdtools.com</a>
+                </div>
+            </div>
+            <div style="border: 0.5px solid var(--border); padding: 40px;">
+                <h3 style="font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; margin-bottom: 16px;">Ready to claim your copy?</h3>
+                <p style="font-size: 14px; line-height: 1.7; margin-bottom: 24px; color: #444;">The founding offer is open to the first 20 users. Free, permanently. No subscription. No trial period. Just the tool.</p>
+                <button class="cta-button" onclick="openSignupModal()"><span data-dynamic="cta">Claim Your Free Copy</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TERMS OF SERVICE -->
+    <div id="terms" style="padding: 60px 48px; border-bottom: 0.5px solid var(--border); max-width: 900px; margin: 0 auto;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy); margin-bottom: 16px;">LEGAL</div>
+        <h2 style="font-family: 'Fraunces', serif; font-size: 40px; font-weight: 900; margin-bottom: 8px;">Terms of Service</h2>
+        <p style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #888; margin-bottom: 40px;">Effective: April 2026 · Freehold Tools, San Francisco, CA</p>
+        <div style="font-size: 14px; line-height: 1.9; color: #333;">
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">1. What You're Buying</h3>
+            <p>Freehold Email is sold as a perpetual software license. A one-time purchase grants you the right to use the software indefinitely, for personal or commercial purposes. You are not purchasing a subscription. There are no recurring fees.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">2. What You Can Do</h3>
+            <p>You may use Freehold Email to manage your own email lists, send campaigns, and operate your email marketing. You may use it for commercial purposes. Your license is non-transferable and covers a single organization or individual.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">3. What You Cannot Do</h3>
+            <p>You may not resell, sublicense, or redistribute the software. You may not use Freehold Email to send spam, unsolicited email, or email to contacts who have not given consent. You may not use the software for any illegal purpose.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">4. Email Sending Compliance</h3>
+            <p>You are solely responsible for complying with applicable email laws including CAN-SPAM (US), CASL (Canada), and GDPR (EU). This means: every email you send must include a physical mailing address and a working unsubscribe link; you must honor unsubscribe requests immediately; you may only email contacts who have given consent. Freehold provides the tool — you are the sender of record.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">5. Third-Party Services</h3>
+            <p>Freehold Email uses Postmark for email delivery. You must have your own Postmark account and agree to Postmark's terms of service. Freehold is not responsible for Postmark's availability, pricing changes, or decisions to terminate your Postmark account.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">6. Refunds</h3>
+            <p>We offer a 30-day money-back guarantee. If you're not satisfied within 30 days of purchase, contact us at moses@freeholdtools.com for a full refund, no questions asked. Founding users (free tier) are not eligible for refunds as no payment was made.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">7. Limitation of Liability</h3>
+            <p>Freehold Email is provided "as is" without warranty of any kind. To the maximum extent permitted by law, Freehold Tools shall not be liable for any indirect, incidental, or consequential damages arising from your use of the software, including lost profits, lost data, or business interruption. Our total liability is capped at the amount you paid for the license.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">8. Changes to These Terms</h3>
+            <p>We may update these terms occasionally. Material changes will be communicated via email. Continued use of the software after notice constitutes acceptance of the updated terms.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">9. Governing Law</h3>
+            <p>These terms are governed by the laws of the State of California, United States. Questions: <a href="mailto:moses@freeholdtools.com" style="color: var(--orange);">moses@freeholdtools.com</a></p>
+        </div>
+    </div>
+
+    <!-- PRIVACY POLICY -->
+    <div id="privacy" style="padding: 60px 48px; border-bottom: 0.5px solid var(--border); max-width: 900px; margin: 0 auto;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy); margin-bottom: 16px;">LEGAL</div>
+        <h2 style="font-family: 'Fraunces', serif; font-size: 40px; font-weight: 900; margin-bottom: 8px;">Privacy Policy</h2>
+        <p style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #888; margin-bottom: 40px;">Effective: April 2026 · Freehold Tools, San Francisco, CA</p>
+        <div style="font-size: 14px; line-height: 1.9; color: #333;">
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">What We Collect</h3>
+            <p>When you sign up: your name and email address. When you use the app: your contacts and subscriber lists, email templates you create, campaigns you send, and aggregate analytics (open rates, click rates, bounces). We collect this information to provide the service and improve the product.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">What We Don't Do</h3>
+            <p>We do not sell your data. We do not run your subscriber lists through AI models. We do not serve ads. We do not share your information with third parties for marketing purposes. Your subscriber list is yours.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Third Parties</h3>
+            <p>We use Postmark to deliver your emails. When you send a campaign, your email content and recipient addresses are passed to Postmark for delivery. Postmark's privacy policy governs how they handle that data. We use Netlify to host this website. We do not use Google Analytics or any other behavioral tracking on this site.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Your Subscriber Data</h3>
+            <p>You are the data controller for your subscriber list. Your contacts' personal information (email addresses, names) is stored in your instance of Freehold Email. We act as a data processor. We do not access your subscriber data for any purpose other than operating the service.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Your Rights</h3>
+            <p>You may request access to, correction of, or deletion of your personal data at any time. California residents have additional rights under CCPA. EU residents have rights under GDPR including the right to data portability and the right to be forgotten. To exercise any of these rights, contact us at <a href="mailto:moses@freeholdtools.com" style="color: var(--orange);">moses@freeholdtools.com</a>.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Data Retention</h3>
+            <p>We retain your account data for as long as your account is active. If you request deletion, we will remove your personal data within 30 days, except where retention is required by law.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Contact</h3>
+            <p>Privacy questions: <a href="mailto:moses@freeholdtools.com" style="color: var(--orange);">moses@freeholdtools.com</a></p>
+        </div>
+    </div>
+
+    <!-- LICENSE AGREEMENT -->
+    <div id="license" style="padding: 60px 48px; border-bottom: 0.5px solid var(--border); max-width: 900px; margin: 0 auto;">
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy); margin-bottom: 16px;">LEGAL</div>
+        <h2 style="font-family: 'Fraunces', serif; font-size: 40px; font-weight: 900; margin-bottom: 8px;">License Agreement</h2>
+        <p style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #888; margin-bottom: 40px;">Effective: April 2026 · Freehold Tools, San Francisco, CA</p>
+        <div style="font-size: 14px; line-height: 1.9; color: #333;">
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Grant of License</h3>
+            <p>Upon purchase, Freehold Tools grants you a perpetual, non-exclusive, non-transferable license to use Freehold Email for personal or commercial purposes. This license does not expire. It is not tied to a subscription. There are no recurring fees associated with this license.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Permitted Uses</h3>
+            <p>You may use the software to manage email lists, create templates, and send marketing campaigns for yourself or your organization. Commercial use is permitted. You may install and use the software on systems you own or control.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Restrictions</h3>
+            <p>You may not: (a) resell, sublicense, or redistribute the software or your license; (b) reverse-engineer or decompile the software; (c) use the software to provide competing services to third parties without written permission from Freehold Tools; (d) remove or alter any proprietary notices or labels on the software.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Ownership</h3>
+            <p>Freehold Tools retains all intellectual property rights in the software. This license grants you the right to use the software, not ownership of it. Your data — contacts, templates, campaigns — belongs to you entirely.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Updates</h3>
+            <p>Updates released during the beta period are included. Future major version updates may be offered at a discounted upgrade price. You are never required to update to continue using your licensed version.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Termination</h3>
+            <p>This license remains in effect unless terminated by breach. If you violate these terms, your license terminates immediately. Termination does not entitle you to a refund beyond our 30-day policy.</p>
+            <h3 style="font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; margin: 32px 0 12px; padding-top: 32px; border-top: 0.5px solid var(--border);">Contact</h3>
+            <p>License questions: <a href="mailto:moses@freeholdtools.com" style="color: var(--orange);">moses@freeholdtools.com</a></p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div>
+            <h3>Product</h3>
+            <ul>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#docs">Documentation</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h3>Company</h3>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#blog">Blog</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h3>Legal</h3>
+            <ul>
+                <li><a href="#terms">Terms of Service</a></li>
+                <li><a href="#privacy">Privacy Policy</a></li>
+                <li><a href="#license">License Agreement</a></li>
+            </ul>
+        </div>
+
+        <div class="copy">© 2026 Freehold Tools. No VC funding. No exit strategy. Built in 2026.</div>
+    </footer>
+
+    <!-- SIGNUP MODAL -->
+    <div id="signup-modal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeSignupModal()">×</button>
+            <div id="modal-form-container">
+                <h2 id="modal-heading">Claim Your Founding Copy</h2>
+                <p id="modal-sub">You're one of the first 20. Freehold Email is yours, free, permanently.</p>
+                <form id="signup-form">
+                    <input type="text" name="name" placeholder="Your name" required="" class="modal-input">
+                    <input type="email" name="email" placeholder="Your email address" required="" class="modal-input">
+                    <input type="hidden" name="tier" id="modal-tier-hidden">
+                    <input type="hidden" name="form-name" value="freehold-signup">
+                    <button type="submit" id="modal-submit-btn" class="modal-input" style="margin-bottom: 24px; padding: 14px 28px;">Claim Your Copy</button>
+                </form>
+                <div class="modal-footer">// No credit card. No commitment. Just the tool.</div>
+            </div>
+        </div>
+    </div>
+
+
+
+<div id="claude-agent-glow-border" style="position: fixed; inset: 0px; pointer-events: none; z-index: 2147483646; opacity: 0; transition: opacity 0.3s ease-in-out; animation: 2s ease-in-out 0s infinite normal none running claude-pulse; box-shadow: rgba(217, 119, 87, 0.5) 0px 0px 10px inset, rgba(217, 119, 87, 0.3) 0px 0px 20px inset, rgba(217, 119, 87, 0.1) 0px 0px 30px inset;"></div></body>
+</html>

@@ -9,7 +9,7 @@
     "start": "NODE_ENV=production node server/index.js",
     "dev": "concurrently \"node --watch server/index.js\" \"cd client && npm run dev\"",
     "setup": "node scripts/init-db.js && node scripts/seed-db.js",
-    "migrate": "node scripts/migrate-add-unsubscribe.js && node scripts/migrate-add-users.js",
+    "migrate": "node scripts/migrate-add-unsubscribe.js && node scripts/migrate-add-users.js && node scripts/migrate-add-signups.js",
     "server:dev": "node --watch server/index.js",
     "server:start": "node server/index.js",
     "client:dev": "vite client --host",

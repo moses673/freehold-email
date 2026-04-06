@@ -60,6 +60,16 @@ export default function Navbar({ currentPage, onPageChange, user, onLogout }) {
           >
             Domain Setup
           </button>
+          <button
+            onClick={() => onPageChange('signups')}
+            className={`px-4 py-2 rounded-md transition ${
+              currentPage === 'signups'
+                ? 'bg-primary text-white'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            Signups
+          </button>
         </div>
 
         {/* User Menu */}
